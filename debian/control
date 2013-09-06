@@ -1,0 +1,14 @@
+Source: sparkey-python
+Section: libs
+Priority: extra
+Maintainer: Kristofer Karlsson <krka@spotify.com>
+Build-Depends: debhelper (>= 7.0.50), libsparkey-dev, libsparkey0, python, python-setuptools, python-epydoc, python-nose
+Standards-Version: 3.9.1
+
+Package: sparkey-python
+Section: libs
+Architecture: any
+Depends: libsparkey0
+Recommends: python
+Description: Python bindings for Sparkey
+

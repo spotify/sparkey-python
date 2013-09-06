@@ -1,0 +1,7 @@
+*.pyc
+build/
+debian/files
+debian/*.log
+debian/sparkey-python.*
+debian/sparkey-python/
+sparkey_python.egg-info/
