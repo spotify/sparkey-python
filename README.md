@@ -25,6 +25,11 @@ License
 -------
 Apache License, Version 2.0
 
+Usage
+-----
+To help get started, take a look at
+the [API documentation](http://spotify.github.io/sparkey-python/apidocs/0.1.0/index.html) or an 
+example usage: [smoke_test.py](test/smoke_test.py)
 
 Performance
 -----------
