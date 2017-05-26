@@ -13,7 +13,7 @@ Optional
 Building
 --------
 
-    PYTHONPATH=. nosetest
+    PYTHONPATH=. nosetests
 
     python setup.py build
 
