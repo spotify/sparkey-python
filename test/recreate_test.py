@@ -41,5 +41,5 @@ class TestRecreate(unittest.TestCase):
             reader = sparkey.HashReader(self.hashfile, self.logfile)
             self.assertEqual(3, len(reader))
             for key in keys:
-                self.assertEqual("value", reader[key])
+                self.assertEqual(b'value', reader[key])
             reader.close()

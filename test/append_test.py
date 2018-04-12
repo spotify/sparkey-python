@@ -39,7 +39,7 @@ class TestAppend(unittest.TestCase):
         writer.close()
         reader = sparkey.HashReader(self.hashfile, self.logfile)
         for key in keys:
-            self.assertEqual('value', reader[key])
+            self.assertEqual(b'value', reader[key])
         reader.close()
         for i in range(0, 10):
             writer = sparkey.HashWriter(self.hashfile, self.logfile,
@@ -49,5 +49,5 @@ class TestAppend(unittest.TestCase):
             writer.close()
             reader = sparkey.HashReader(self.hashfile, self.logfile)
             for key in keys:
-                self.assertEqual('value%d' % i, reader[key])
+                self.assertEqual(b'value%d' % i, reader[key])
             reader.close()
