@@ -61,5 +61,5 @@ class TestBinary(unittest.TestCase):
 
         reader = sparkey.HashReader(self.hashfile, self.logfile)
         for key in keys:
-            self.assertEqual('value', reader[binascii.unhexlify(key)])
+            self.assertEqual(b'value', reader[binascii.unhexlify(key)])
         reader.close()
