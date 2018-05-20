@@ -38,8 +38,8 @@ class TestSmoke(unittest.TestCase):
 
         reader = sparkey.LogReader(self.logfile)
         for i, (key, value, type) in enumerate(reader):
-            self.assertEqual('key%d' % i, key)
-            self.assertEqual('value%d' % i, value)
+            self.assertEqual(b'key%d' % i, key)
+            self.assertEqual(b'value%d' % i, value)
             self.assertEqual(sparkey.IterType.PUT, type)
 
         self.assertEqual(9, i)
@@ -50,17 +50,17 @@ class TestSmoke(unittest.TestCase):
         hashreader = sparkey.HashReader(self.hashfile, self.logfile)
         self.assertEqual(10, len(hashreader))
         for i in range(0, 10):
-            self.assertTrue('key%d' % i in hashreader)
+            self.assertTrue(b'key%d' % i in hashreader)
 
-        self.assertFalse('key_miss' in hashreader)
+        self.assertFalse(b'key_miss' in hashreader)
 
         for i, (key, value) in enumerate(hashreader):
-            self.assertEqual('key%d' % i, key)
-            self.assertEqual('value%d' % i, value)
+            self.assertEqual(b'key%d' % i, key)
+            self.assertEqual(b'value%d' % i, value)
         self.assertEqual(9, i)
 
-        self.assertEqual('value0', hashreader.get('key0'))
-        self.assertEqual('value9', hashreader.get('key9'))
+        self.assertEqual(b'value0', hashreader.get('key0'))
+        self.assertEqual(b'value9', hashreader.get('key9'))
         self.assertEqual(None, hashreader.get('key10'))
 
         hashreader.close()

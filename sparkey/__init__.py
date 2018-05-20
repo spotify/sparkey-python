@@ -120,6 +120,19 @@ _hash_get = _ctypes_wrapper(libsparkey.sparkey_hash_get, ctypes.c_int, _ptr,
 _hash_numentries = _format(libsparkey.sparkey_hash_numentries,
                            _c_ulonglong, _ptr)
 
+if str == bytes:
+    def _to_bytes(s, name):
+        if type(s) != str:
+            raise SparkeyException(s + " must be a string")
+        return s
+else:
+    def _to_bytes(s, name):
+        t = type(s)
+        if t == bytes:
+            return s
+        if t != str:
+            raise SparkeyException(name + " must be a string")
+        return s.encode('utf-8')
 
 class LogWriter(object):
     def __init__(self, filename, mode='NEW',
@@ -153,6 +166,7 @@ class LogWriter(object):
                fairly small multiple of expected key + value size.
 
         """
+        filename = _to_bytes(filename, "filename")
         log = _ptr()
         self._log = log
         if mode == 'NEW':
@@ -200,10 +214,8 @@ class LogWriter(object):
 
         """
         self._assert_open()
-        if type(key) != str:
-            raise SparkeyException("key must be a string")
-        if type(value) != str:
-            raise SparkeyException("value must be a string")
+        key = _to_bytes(key, "key")
+        value = _to_bytes(value, "value")
         _logwriter_put(self._log, len(key), key, len(value), value)
 
     def __delitem__(self, key):
@@ -217,8 +229,7 @@ class LogWriter(object):
 
         """
         self._assert_open()
-        if type(key) != str:
-            raise SparkeyException("key must be a string")
+        key = _to_bytes(key, "key")
         _logwriter_delete(self._log, len(key), key)
 
 
@@ -229,6 +240,7 @@ class LogReader(object):
         @param filename: file to open.
 
         """
+        filename = _to_bytes(filename, "filename")
         log = _ptr()
         self._log = log
         _logreader_open(_byref(log), filename)
@@ -325,6 +337,9 @@ class LogIter(object):
         _logiter_next(self._iter, self._log._log)
         return _iter_res(self._iter, self._log._log)
 
+    def __next__(self):
+        return self.next()
+
 
 def writehash(hashfile, logfile, hash_size=0):
     """Write a hash file based on the contents in the log file.
@@ -341,6 +356,8 @@ def writehash(hashfile, logfile, hash_size=0):
                       hash size. 4 is 32 bit hash, 8 is 64 bit hash.
 
     """
+    hashfile = _to_bytes(hashfile, "hashfile")
+    logfile = _to_bytes(logfile, "logfile")
     _hash_write(hashfile, logfile, hash_size)
 
 
@@ -356,6 +373,8 @@ class HashReader(object):
         @param logfile: Log file to open, must exist.
 
         """
+        hashfile = _to_bytes(hashfile, "hashfile")
+        logfile = _to_bytes(logfile, "logfile")
         reader = _ptr()
         self._reader = reader
         self._iter = None
@@ -471,6 +490,9 @@ class HashIterator(object):
             key, value, type = t
             return key, value
 
+    def __next__(self):
+        return self.next()
+
     def _assert_open(self):
         if self._hashreader is None:
             raise SparkeyException("Iterator is closed")
@@ -491,6 +513,7 @@ class HashIterator(object):
                   key does not exist.
 
         """
+        key = _to_bytes(key,  "key")
         self._assert_open()
         iterator = self._iter
         log = self._log

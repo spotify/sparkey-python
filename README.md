@@ -13,7 +13,11 @@ Optional
 Building
 --------
 
+    # Python 2
     PYTHONPATH=. nosetests
+
+    # Python 3
+    PYTHONPATH=. python -m "nose"
 
     python setup.py build
 
