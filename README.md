@@ -14,7 +14,7 @@ Building
 --------
 
     # Python 2
-    PYTHONPATH=. nosetest
+    PYTHONPATH=. nosetests
 
     # Python 3
     PYTHONPATH=. python -m "nose"
