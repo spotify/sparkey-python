@@ -39,9 +39,9 @@ Build & Install
 ---------------
 Build and install was based off of this [article](https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/)
 ```
-pip install -U pip pep517 twine
+pip3 install -U pip pep517 twine
 rm -rf build dist
-python -m pep517.build .
+python3 -m pep517.build .
 ```
 
 Performance
