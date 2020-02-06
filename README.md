@@ -35,6 +35,15 @@ To help get started, take a look at
 the [API documentation](http://spotify.github.io/sparkey-python/apidocs/0.1.0/index.html) or an 
 example usage: [smoke_test.py](test/smoke_test.py)
 
+Build & Install
+---------------
+Build and install was based off of this [article](https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/)
+```
+pip install -U pip pep517 twine
+rm -rf build dist
+python -m pep517.build .
+```
+
 Performance
 -----------
 This data is the direct output from running
