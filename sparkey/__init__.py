@@ -15,8 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from builtins import next
+from builtins import object
 import ctypes
 import ctypes.util
+import future
 
 libsparkey = ctypes.cdll.LoadLibrary(ctypes.util.find_library("sparkey"))
 
@@ -122,7 +125,7 @@ _hash_numentries = _format(libsparkey.sparkey_hash_numentries,
 
 if str == bytes:
     def _to_bytes(s, name):
-        if type(s) != str:
+        if type(s) != str and type(s) != future.types.newstr:
             raise SparkeyException(s + " must be a string")
         return s
 else:
@@ -324,7 +327,7 @@ class LogIter(object):
             raise SparkeyException("Iterator is closed")
         self._log._assert_open()
 
-    def next(self):
+    def __next__(self):
         """Return next element in the log.
 
         @return: (key, value, type) if there are remaining elements.
@@ -338,7 +341,7 @@ class LogIter(object):
         return _iter_res(self._iter, self._log._log)
 
     def __next__(self):
-        return self.next()
+        return next(self)
 
 
 def writehash(hashfile, logfile, hash_size=0):
@@ -397,7 +400,7 @@ class HashReader(object):
 
     def __iter__(self):
         """Equivalent to L{iteritems}"""
-        return self.iteritems()
+        return iter(self.items())
 
     def iteritems(self):
         """Iterate through all live entries.
@@ -473,7 +476,7 @@ class HashIterator(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         """Return next live entry in the log.
 
         @return: (key, value) if there are remaining elements. key and
@@ -491,7 +494,7 @@ class HashIterator(object):
             return key, value
 
     def __next__(self):
-        return self.next()
+        return next(self)
 
     def _assert_open(self):
         if self._hashreader is None:
@@ -647,7 +650,7 @@ class HashWriter(object):
 
     def __iter__(self):
         """Equivalent to L{iteritems}"""
-        return self.iteritems()
+        return iter(self.items())
 
     def iteritems(self):
         """Iterate through all entries that have been flushed.
@@ -656,7 +659,7 @@ class HashWriter(object):
 
         """
         self._assert_open()
-        return self._init_reader().iteritems()
+        return iter(self._init_reader().items())
 
     def __getitem__(self, key):
         """Equivalent to writer.get(key), see L{get}"""

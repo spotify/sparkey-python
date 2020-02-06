@@ -15,14 +15,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import sparkey
 import tempfile
 import os
 import unittest
 import time
+import sys
 from random import randint
 
 class TestBench(unittest.TestCase):
+
+  def getClock(self):
+      if sys.version_info >= (3, 0):
+          return time.process_time()
+      else:
+          return time.clock()
+
   def setUp(self):
     self.log_fd, self.logfile = tempfile.mkstemp()
     self.hash_fd, self.hashfile = tempfile.mkstemp()
@@ -33,34 +46,34 @@ class TestBench(unittest.TestCase):
 
   def _create(self, compression_type, num_entries):
       writer = sparkey.LogWriter(self.logfile, compression_type=compression_type, compression_block_size=1024)
-      for i in xrange(0, num_entries):
+      for i in range(0, num_entries):
         writer.put("key_" + str(i), "value_" + str(i))
       writer.close()
       sparkey.writehash(self.hashfile, self.logfile)
 
   def _random_access(self, num_entries, num_lookups):
       reader = sparkey.HashReader(self.hashfile, self.logfile)
-      for i in xrange(0, num_lookups):
+      for i in range(0, num_lookups):
         r = str(randint(0, num_entries - 1))
-        self.assertEquals("value_" + r, reader['key_' + r])
+        self.assertEqual("value_" + r, reader['key_' + r].decode())
       reader.close()
 
   def _test(self, compression_type, num_entries, num_lookups):
-      print "Testing bulk insert of %d elements and %d random lookups" % (num_entries, num_lookups)
-      print "  Candidate: Sparkey %s" % ("None" if compression_type == 0 else "Snappy")
-      t1 = time.clock()
+      print("Testing bulk insert of %d elements and %d random lookups" % (num_entries, num_lookups))
+      print("  Candidate: Sparkey %s" % ("None" if compression_type == 0 else "Snappy"))
+      t1 = self.getClock()
       self._create(compression_type, num_entries)
-      t2 = time.clock()
+      t2 = self.getClock()
 
-      print "    creation time (wall):      %2.2f" % (t2 - t1)
-      print "    throughput (puts/wallsec): %2.2f" % (num_entries / (t2 - t1))
-      print "    file size:                 %d" % (os.stat(self.logfile).st_size + os.stat(self.hashfile).st_size)
+      print("    creation time (wall):      %2.2f" % (t2 - t1))
+      print("    throughput (puts/wallsec): %2.2f" % (old_div(num_entries, (t2 - t1))))
+      print("    file size:                 %d" % (os.stat(self.logfile).st_size + os.stat(self.hashfile).st_size))
 
       self._random_access(num_entries, num_lookups)
 
-      t3 = time.clock()
-      print "    lookup time (wall):           %2.2f" % (t3 - t2)
-      print "    throughput (lookups/wallsec): %2.2f" % (num_lookups / (t3 - t2))
+      t3 = self.getClock()
+      print("    lookup time (wall):           %2.2f" % (t3 - t2))
+      print("    throughput (lookups/wallsec): %2.2f" % (old_div(num_lookups, (t3 - t2))))
 
   def testBench(self):
     self._test(sparkey.Compression.NONE, 1000, 1000*1000)
