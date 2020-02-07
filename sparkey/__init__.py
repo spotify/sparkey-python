@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from builtins import next
 from builtins import object
 import ctypes
 import ctypes.util
@@ -349,7 +348,7 @@ class LogIter(object):
             raise SparkeyException("Iterator is closed")
         self._log._assert_open()
 
-    def __next__(self):
+    def next(self):
         """Return next element in the log.
 
         @return: (key, value, type) if there are remaining elements.
@@ -363,7 +362,7 @@ class LogIter(object):
         return _iter_res(self._iter, self._log._log)
 
     def __next__(self):
-        return next(self)
+        return self.next()
 
 
 def writehash(hashfile, logfile, hash_size=0):
@@ -422,7 +421,7 @@ class HashReader(object):
 
     def __iter__(self):
         """Equivalent to L{iteritems}"""
-        return iter(self.items())
+        return self.iteritems()
 
     def iteritems(self):
         """Iterate through all live entries.
@@ -511,7 +510,7 @@ class HashIterator(object):
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         """Return next live entry in the log.
 
         @return: (key, value) if there are remaining elements. key and
@@ -529,7 +528,7 @@ class HashIterator(object):
             return key, value
 
     def __next__(self):
-        return next(self)
+        return self.next()
 
     def _assert_open(self):
         if self._hashreader is None:
@@ -696,7 +695,7 @@ class HashWriter(object):
 
     def __iter__(self):
         """Equivalent to L{iteritems}"""
-        return iter(self.items())
+        return self.iteritems()
 
     def iteritems(self):
         """Iterate through all entries that have been flushed.
@@ -705,7 +704,7 @@ class HashWriter(object):
 
         """
         self._assert_open()
-        return iter(self._init_reader().items())
+        return self._init_reader().iteritems()
 
     def __getitem__(self, key):
         """Equivalent to writer.get(key), see L{get}"""

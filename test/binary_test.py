@@ -53,29 +53,38 @@ class TestBinary(unittest.TestCase):
         os.remove(self.logfile)
         os.remove(self.hashfile)
 
-    def test_binary_key(self):
+    def test_binary_key_and_value(self):
 
         writer = sparkey.HashWriter(self.hashfile, self.logfile)
         for key in keys:
-            writer.put(binascii.unhexlify(key), binascii.unhexlify('value' + key))
+            writer.put(binascii.unhexlify(key), binascii.unhexlify(key))
         writer.close()
 
         reader = sparkey.HashReader(self.hashfile, self.logfile)
         for key in keys:
-            self.assertEqual(binascii.unhexlify('value' + key), reader[binascii.unhexlify(key)])
-            self.assertEqual(binascii.unhexlify('value' + key), reader.get(binascii.unhexlify(key)))
+            self.assertEqual(binascii.unhexlify(key), reader[binascii.unhexlify(key)])
+            self.assertEqual(binascii.unhexlify(key), reader.get(binascii.unhexlify(key)))
+            self.assertEqual(binascii.unhexlify(key), reader.getAsString(binascii.unhexlify(key)))
 
         reader.close()
 
-    def test_binary_key_and_value(self):
+    def test_binary_key(self):
         writer = sparkey.HashWriter(self.hashfile, self.logfile)
         for key in keys:
             writer.put(binascii.unhexlify(key), 'value')
+        writer.flush()
+
+        for key in keys:
+            self.assertEqual('value', writer.getAsString(binascii.unhexlify(key)))
+            self.assertEqual(b'value', writer[binascii.unhexlify(key)])
+            self.assertEqual(b'value', writer.get(binascii.unhexlify(key)))
+
         writer.close()
 
         reader = sparkey.HashReader(self.hashfile, self.logfile)
         for key in keys:
+            self.assertEqual('value', reader.getAsString(binascii.unhexlify(key)))
             self.assertEqual(b'value', reader[binascii.unhexlify(key)])
             self.assertEqual(b'value', reader.get(binascii.unhexlify(key)))
-
         reader.close()
+
