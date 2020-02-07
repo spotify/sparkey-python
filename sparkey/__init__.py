@@ -130,9 +130,10 @@ if str == bytes:
         return s
     
     def _to_str(b, name):
+        if b is None: return None
         if type(b) != str:
             raise SparkeyException(s + " must be a string")
-        return s
+        return b
     
 else:
     def _to_bytes(s, name):
@@ -150,7 +151,7 @@ else:
             return b
         if t != bytes:
             raise SparkeyException(name + " must be bytes")
-        return s.decode('utf-8')
+        return b.decode('utf-8')
 
 class LogWriter(object):
     def __init__(self, filename, mode='NEW',
