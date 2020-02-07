@@ -439,7 +439,10 @@ class HashReader(object):
     def __getitem__(self, key):
         """reader[key] throws KeyError exception when key doesn't exist,
         otherwise is equivalent to reader.get(key) (see L{get})
+           @param key for the item
 
+           **Note** in python 3 this always returns a bytes object, use
+                    getAsString(key) to return a String version.
         """
         value = self.get(key)
         if value is None:
