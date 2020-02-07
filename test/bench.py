@@ -55,7 +55,7 @@ class TestBench(unittest.TestCase):
       reader = sparkey.HashReader(self.hashfile, self.logfile)
       for i in range(0, num_lookups):
         r = str(randint(0, num_entries - 1))
-        self.assertEqual("value_" + r, reader['key_' + r].decode())
+        self.assertEqual("value_" + r, reader.getAsString('key_' + r))
       reader.close()
 
   def _test(self, compression_type, num_entries, num_lookups):

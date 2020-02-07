@@ -126,13 +126,13 @@ _hash_numentries = _format(libsparkey.sparkey_hash_numentries,
 if str == bytes:
     def _to_bytes(s, name):
         if type(s) != str and type(s) != future.types.newstr:
-            raise SparkeyException(s + " must be a string")
+            raise SparkeyException(name + " must be a string")
         return s
     
     def _to_str(b, name):
         if b is None: return None
         if type(b) != str:
-            raise SparkeyException(s + " must be a string")
+            raise SparkeyException(name + " must be a string")
         return b
     
 else:
@@ -479,7 +479,7 @@ class HashReader(object):
         @returns: a string representing the value associated with the key, or None if the
                   key does not exist.
         """
-        return _to_str(self.get(key))
+        return _to_str(self.get(key), "value")
 
     def __len__(self):
         return _hash_numentries(self._reader)
@@ -580,7 +580,7 @@ class HashIterator(object):
         @returns: a string representing the value associated with the key, or None if the
                   key does not exist.
         """
-        return _to_str(self.get(key))
+        return _to_str(self.get(key), "value")
     
 
 
@@ -734,4 +734,4 @@ class HashWriter(object):
                   key does not exist in the hash.
 
         """
-        return _to_str(self.get(key))
+        return _to_str(self.get(key), "value")
