@@ -124,7 +124,8 @@ _hash_numentries = _format(libsparkey.sparkey_hash_numentries,
 
 if str == bytes:
     def _to_bytes(s, name):
-        if type(s) != str and type(s) != future.types.newstr:
+        t = type(s)
+        if t != str and t != future.types.newstr:
             raise SparkeyException(name + " must be a string")
         return s
     
