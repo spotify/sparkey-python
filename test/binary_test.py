@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2013 Spotify AB
+# Copyright 2012-2020 Spotify AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,13 +53,38 @@ class TestBinary(unittest.TestCase):
         os.remove(self.logfile)
         os.remove(self.hashfile)
 
-    def test_binary(self):
+    def test_binary_key_and_value(self):
+
         writer = sparkey.HashWriter(self.hashfile, self.logfile)
         for key in keys:
-            writer.put(binascii.unhexlify(key), 'value')
+            writer.put(binascii.unhexlify(key), binascii.unhexlify(key))
         writer.close()
 
         reader = sparkey.HashReader(self.hashfile, self.logfile)
         for key in keys:
-            self.assertEqual(b'value', reader[binascii.unhexlify(key)])
+            self.assertEqual(binascii.unhexlify(key), reader[binascii.unhexlify(key)])
+            self.assertEqual(binascii.unhexlify(key), reader.get(binascii.unhexlify(key)))
+            self.assertEqual(binascii.unhexlify(key), reader.getAsString(binascii.unhexlify(key)))
+
         reader.close()
+
+    def test_binary_key(self):
+        writer = sparkey.HashWriter(self.hashfile, self.logfile)
+        for key in keys:
+            writer.put(binascii.unhexlify(key), 'value')
+        writer.flush()
+
+        for key in keys:
+            self.assertEqual('value', writer.getAsString(binascii.unhexlify(key)))
+            self.assertEqual(b'value', writer[binascii.unhexlify(key)])
+            self.assertEqual(b'value', writer.get(binascii.unhexlify(key)))
+
+        writer.close()
+
+        reader = sparkey.HashReader(self.hashfile, self.logfile)
+        for key in keys:
+            self.assertEqual('value', reader.getAsString(binascii.unhexlify(key)))
+            self.assertEqual(b'value', reader[binascii.unhexlify(key)])
+            self.assertEqual(b'value', reader.get(binascii.unhexlify(key)))
+        reader.close()
+

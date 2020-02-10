@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012-2013 Spotify AB
+# Copyright 2012-2020 Spotify AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from builtins import object
 import ctypes
 import ctypes.util
+import future
 
 libsparkey = ctypes.cdll.LoadLibrary(ctypes.util.find_library("sparkey"))
 
@@ -122,9 +124,17 @@ _hash_numentries = _format(libsparkey.sparkey_hash_numentries,
 
 if str == bytes:
     def _to_bytes(s, name):
-        if type(s) != str:
-            raise SparkeyException(s + " must be a string")
+        t = type(s)
+        if t != str and t != future.types.newstr:
+            raise SparkeyException(name + " must be a string")
         return s
+    
+    def _to_str(b, name):
+        if b is None: return None
+        if type(b) != str:
+            raise SparkeyException(name + " must be a string")
+        return b
+    
 else:
     def _to_bytes(s, name):
         t = type(s)
@@ -134,10 +144,23 @@ else:
             raise SparkeyException(name + " must be a string")
         return s.encode('utf-8')
 
+    def _to_str(b, name):
+        if b is None: return None
+        t = type(b)
+        if t == str:
+            return b
+        if t != bytes:
+            raise SparkeyException(name + " must be bytes")
+        return b.decode('utf-8')
+
 class LogWriter(object):
     def __init__(self, filename, mode='NEW',
                  compression_type=Compression.NONE, compression_block_size=0):
         """Creates or appends a log file.
+        
+        Types of keys and values can be strings or bytes.
+        For Python 2, this is the same thing.
+        For Python 3, strings will be encoded as UTF-8
 
         This is not threadsafe, don't write to the same file from
         multiple threads or processes.
@@ -209,9 +232,9 @@ class LogWriter(object):
     def put(self, key, value):
         """Append the key-value pair to the log.
 
-        @param key: must be a string
-        @param value: must be a string
-
+        @param key: type must be bytes or string
+        @param value: type must be bytes or string
+        
         """
         self._assert_open()
         key = _to_bytes(key, "key")
@@ -225,7 +248,7 @@ class LogWriter(object):
     def delete(self, key):
         """Appends a delete operation of key to the log.
 
-        @param key: must be a string
+        @param key: type must be bytes or string
 
         """
         self._assert_open()
@@ -414,7 +437,10 @@ class HashReader(object):
     def __getitem__(self, key):
         """reader[key] throws KeyError exception when key doesn't exist,
         otherwise is equivalent to reader.get(key) (see L{get})
+           @param key: for the item
 
+           **Note** in python 3 this always returns a bytes object, use
+                    getAsString(key) to return a String version.
         """
         value = self.get(key)
         if value is None:
@@ -437,14 +463,24 @@ class HashReader(object):
         return self.__contains__(key)
 
     def get(self, key):
-        """Retrieve the value assosiated with the key
+        """Retrieve the value associated with the key
 
-        @param key: must be a string
+        @param key: type must be bytes or string
 
-        @returns: the value associated with the key, or None if the
+        @returns: bytes representing the value associated with the key, or None if the
                   key does not exist.
         """
         return self._iter.get(key)
+    
+    def getAsString(self, key):
+        """Retrieve the value associated with the key
+
+        @param key: type must be bytes or string
+
+        @returns: a string representing the value associated with the key, or None if the
+                  key does not exist.
+        """
+        return _to_str(self.get(key), "value")
 
     def __len__(self):
         return _hash_numentries(self._reader)
@@ -507,9 +543,9 @@ class HashIterator(object):
     def get(self, key):
         """Get the value associated with the key
 
-        @param key: must be a string
+        @param key: type must be bytes or string
 
-        @returns: the value associated with the key, or None if the
+        @returns: bytes representing the value associated with the key, or None if the
                   key does not exist.
 
         """
@@ -536,6 +572,17 @@ class HashIterator(object):
                                    (valuelen, clen.value))
         value = string_buffer.raw
         return value
+    
+    def getAsString(self, key):
+        """Retrieve the value associated with the key
+
+        @param key: type must be bytes or string
+
+        @returns: a string representing the value associated with the key, or None if the
+                  key does not exist.
+        """
+        return _to_str(self.get(key), "value")
+    
 
 
 class HashWriter(object):
@@ -579,9 +626,9 @@ class HashWriter(object):
     def put(self, k, v):
         """Append the key-value pair to the log.
 
-        @param key: must be a string
+        @param key: type must be bytes or string
 
-        @param value: must be a string
+        @param value: type must be bytes or string
 
         """
         self._logwriter.put(k, v)
@@ -593,7 +640,7 @@ class HashWriter(object):
     def delete(self, k):
         """Appends a delete operation of key to the log.
 
-        @param key: must be a string
+        @param key: type must be bytes or string
 
         """
         self._assert_open()
@@ -668,11 +715,24 @@ class HashWriter(object):
 
         Only finds things that were flushed to the hash.
 
-        @param key: must be a string
+        @param key: type must be bytes or string
 
-        @returns: the value associated with the key, or None if the
+        @returns: bytes representing the value associated with the key, or None if the
                   key does not exist in the hash.
 
         """
         self._assert_open()
         return self._init_reader().get(key)
+
+    def getAsString(self, key):
+        """Performs a hash lookup of a key.
+
+        Only finds things that were flushed to the hash.
+
+        @param key: type must be bytes or string
+
+        @returns: a string representing the value associated with the key, or None if the
+                  key does not exist in the hash.
+
+        """
+        return _to_str(self.get(key), "value")
