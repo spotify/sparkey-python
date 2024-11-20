@@ -9,14 +9,14 @@ import re
 from setuptools import setup
 
 setup(name='sparkey-python',
-      version='0.2.0',
+      version='0.3.0',
       author=u'Kristofer Karlsson',
       author_email='krka@spotify.com',
       description='Python bindings for Sparkey',
       license='Apache Software License 2.0',
       packages=['sparkey'],
       install_requires=[
-        "future==0.18.2"
+        "future==1.0.0"
       ],
       classifiers=[
           'Topic :: Database',
